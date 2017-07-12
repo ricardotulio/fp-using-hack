@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+  hhvm: 
+    image: brunoric/hhvm:deb-hhvm
+    volumes:
+      - ./:/usr/share/nginx/html/
+      - ./infra/etc/hhvm/server.ini:/etc/hhvm/server.ini
+      - ./infra/etc/hhvm/php.ini:/etc/hhvm/php.ini
+    privileged: true
+  
+  nginx:
+    image: nginx
+    volumes:
+      - ./:/usr/share/nginx/html/
+      - ./infra/etc/nginx/conf.d/default.conf.template:/etc/nginx/conf.d/default.conf.template
+    working_dir: /usr/share/nginx/html/
+    ports:
+      - 80:80
+      - 443:443
+    command: /bin/bash -c "cat /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    depends_on:
+      - hhvm
